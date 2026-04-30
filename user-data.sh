@@ -11,6 +11,8 @@ CF_API_TOKEN_PARAM_NAME="/ec2-user/cloudfare-api-token"
 CF_ZONE_ID_PARAM_NAME="/ec2-user/cloudfare-zone-id"
 CF_RECORD_NAMES_PARAM_NAME="/ec2-user/hosted-domains"
 TAILSCALE_AUTH_KEY_PARAM_NAME="/ec2-user/tailscale-auth-key"
+PROJECT_REPO_URL="https://github.com/chidam333/aws-user-data.git"
+PROJECT_DIR="/opt/aws-user-data"
 
 export CF_API_TOKEN="$(aws ssm get-parameter \
 	--name "$CF_API_TOKEN_PARAM_NAME" \
@@ -52,3 +54,16 @@ curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key
 # Install Certbot and Auto-Renewal with nginx reload hook
 dnf -y install certbot python3-certbot-nginx
 certbot renew --dry-run --deploy-hook "systemctl reload nginx"
+
+# trigger the node scripts
+dnf -y install git
+
+# Download the deployment project and run the main setup script from the repo root.
+if [ -d "$PROJECT_DIR/.git" ]; then
+	git -C "$PROJECT_DIR" pull --ff-only origin main
+else
+	git clone --depth 1 "$PROJECT_REPO_URL" "$PROJECT_DIR"
+fi
+
+cd "$PROJECT_DIR"
+node scripts/main.mjs
