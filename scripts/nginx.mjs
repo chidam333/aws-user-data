@@ -15,20 +15,31 @@ const projectRoot = path.resolve(__dirname, "..");
 const execFileAsync = promisify(execFile);
 
 async function reloadNginx() {
+	// Try to reload nginx via systemctl (preferred method)
 	try {
 		await execFileAsync("systemctl", ["reload", "nginx"]);
 		return;
 	} catch (error) {
 		console.error(
-			`${YELLOW}systemctl reload nginx failed: ${error.message}${RESET}`
+			`${RED}systemctl reload nginx failed: ${error.message}${RESET}`
 		);
 	}
 
+	// Fallback: try to reload nginx via nginx -s reload
 	try {
 		await execFileAsync("nginx", ["-s", "reload"]);
 	} catch (error) {
 		console.error(
 			`${RED}nginx -s reload failed: ${error.message}${RESET}`
+		);
+	}
+
+	// Last resort: start nginx if it's not running (e.g., after a reboot)
+	try {
+		await execFileAsync("systemctl", ["start", "nginx"]);
+	} catch (error) {
+		console.error(
+			`${RED}systemctl start nginx failed: ${error.message}${RESET}`
 		);
 		throw error;
 	}
