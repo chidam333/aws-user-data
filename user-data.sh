@@ -50,6 +50,8 @@ curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key
 # Install Certbot and Auto-Renewal with nginx reload hook
 dnf -y install certbot python3-certbot-nginx
 
+node "$PROJECT_DIR/scripts/main.mjs"
+
 # Obtain SSL certificate for photos.chidam.xyz
 certbot --nginx \
   --non-interactive \
@@ -61,6 +63,3 @@ certbot --nginx \
 
 # Test auto-renewal and reload nginx after successful renewal
 certbot renew --dry-run --deploy-hook "systemctl reload nginx"
-
-# Download the scripts from s3 and execute the main script.
-node "$PROJECT_DIR/scripts/main.mjs"
