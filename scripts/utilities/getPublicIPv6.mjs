@@ -2,7 +2,7 @@ import { GREEN, RESET } from "../colors.mjs";
 import { isValidIPv6 } from "./isValidIPv6.mjs";
 
 export async function getPublicIPv6() {
-	console.log("Fetching public IPv6 from ifconfig.me/ip...");
+	console.log(`${GREEN}Fetching public IPv6 from ifconfig.me/ip...${RESET}`);
 
 	let response;
 	try {
@@ -30,6 +30,6 @@ export async function getPublicIPv6() {
 		);
 	}
 
-	console.log(`${GREEN}Public IPv6: ${ip}${RESET}`);
+	console.log(`\n\n${GREEN}Public IPv6: ${ip}${RESET}`);
 	return ip;
 }
