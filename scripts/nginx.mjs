@@ -5,7 +5,12 @@ import path from "node:path";
 import process from "node:process";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
 import { GREEN, RED, RESET, YELLOW } from "./colors.mjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, "..");
 
 const execFileAsync = promisify(execFile);
 
@@ -31,7 +36,6 @@ async function reloadNginx() {
 
 /** Copies the project's nginx directory into the system nginx config path. */
 export async function copyNginxConfig(targetOverride) {
-	const projectRoot = process.cwd();
 	const sourceDir = path.resolve(projectRoot, "scripts", "nginx");
 	const targetDir =  "/etc/nginx"
 
