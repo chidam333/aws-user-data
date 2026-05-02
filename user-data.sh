@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-# AWS cli 
-dnf -y install awscli
-
 # Populate Cloudflare env vars from SSM Parameter Store for scripts/cloudfare.mjs.
 CF_API_TOKEN_PARAM_NAME="/ec2-user/cloudfare-api-token"
 CF_ZONE_ID_PARAM_NAME="/ec2-user/cloudfare-zone-id"
 CF_RECORD_NAMES_PARAM_NAME="/ec2-user/hosted-domains"
 TAILSCALE_AUTH_KEY_PARAM_NAME="/ec2-user/tailscale-auth-key"
-PROJECT_S3_BUCKET="s3://ec2-user-aws-user-data"
 PROJECT_DIR="/opt/aws-user-data"
 
 export CF_API_TOKEN="$(aws ssm get-parameter \
@@ -56,5 +52,4 @@ dnf -y install certbot python3-certbot-nginx
 certbot renew --dry-run --deploy-hook "systemctl reload nginx"
 
 # Download the scripts from s3 and execute the main script.
-aws s3 sync "$PROJECT_S3_BUCKET" "$PROJECT_DIR" --delete --region ap-south-2 --endpoint-url https://s3.dualstack.ap-south-2.amazonaws.com
 node "$PROJECT_DIR/scripts/main.mjs"
