@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
-# Send all script output to a log file for troubleshooting.
-exec > /var/log/user-data.log 2>&1
-
-# AWS cli is needed for ssm parameter store access
+# AWS cli 
 dnf -y install awscli
 
 # Populate Cloudflare env vars from SSM Parameter Store for scripts/cloudfare.mjs.
