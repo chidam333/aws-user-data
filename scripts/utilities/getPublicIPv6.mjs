@@ -1,12 +1,19 @@
 import { isValidIPv6 } from "./isValidIPv6.mjs";
 
 export async function getPublicIPv6() {
-	const response = await fetch("http://checkip.amazonaws.com", {
-		headers: {
-			"User-Agent": "cloudflare-ipv6-ddns/1.0",
-			Accept: "text/plain",
-		},
-	});
+	let response;
+	try {
+		response = await fetch("http://checkip.amazonaws.com", {
+			headers: {
+				"User-Agent": "cloudflare-ipv6-ddns/1.0",
+				Accept: "text/plain",
+			},
+		});
+	} catch (error) {
+		throw new Error(
+			`fetch failed: ${error.message} (cause: ${error.cause?.message || "unknown"})`
+		);
+	}
 
 	if (!response.ok) {
 		throw new Error(
