@@ -50,15 +50,23 @@ curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key
 # Install Certbot and Auto-Renewal with nginx reload hook
 dnf -y install certbot python3-certbot-nginx
 
+# Scripts updates DNS record in cloudfare, we want to do it before obtaining SSL certificate to ensure certbot can verify domain ownership.
 node "$PROJECT_DIR/scripts/main.mjs"
 
-# Obtain SSL certificate for photos.chidam.xyz
+# Convert comma-separated domains to certbot -d flags
+DOMAINS=$(echo "$CF_RECORD_NAMES" | tr ',' '\n' | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+CERTBOT_DOMAINS=""
+for domain in $DOMAINS; do
+  CERTBOT_DOMAINS="$CERTBOT_DOMAINS -d $domain"
+done
+
+# Obtain SSL certificate
 certbot --nginx \
   --non-interactive \
   --agree-tos \
   --email chidam.sync@gmail.com \
   --redirect \
-  -d photos.chidam.xyz \
+  $CERTBOT_DOMAINS \
   --no-eff-email
 
 # Test auto-renewal and reload nginx after successful renewal
