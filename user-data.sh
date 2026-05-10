@@ -44,6 +44,8 @@ dnf install -y nodejs npm
 # Install Nginx.
 dnf -y install nginx
 
+dnf -y install libnginx-mod-http-js
+
 # Install Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key="$TAILSCALE_AUTH_KEY"
 
