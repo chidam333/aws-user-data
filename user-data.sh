@@ -41,10 +41,19 @@ export TAILSCALE_AUTH_KEY="$(aws ssm get-parameter \
 # Install latest Node from dnf
 dnf install -y nodejs npm
 
-# Install Nginx.
-dnf -y install nginx
+# Add nginx.org repo for njs module (not available in Amazon Linux 2023 default repos)
+cat > /etc/yum.repos.d/nginx.repo << 'EOF'
+[nginx-stable]
+name=nginx stable repo
+baseurl=https://nginx.org/packages/centos/9/$basearch/
+gpgcheck=1
+enabled=1
+gpgkey=https://nginx.org/keys/nginx_signing.key
+module_hotfixes=true
+EOF
 
-dnf -y install nginx-module-njs
+# Install Nginx with njs module from nginx.org
+dnf -y install nginx nginx-module-njs
 
 # Install Tailscale
 curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key="$TAILSCALE_AUTH_KEY"
