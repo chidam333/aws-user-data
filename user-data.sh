@@ -38,15 +38,21 @@ for domain in $DOMAINS; do
   CERTBOT_DOMAINS="$CERTBOT_DOMAINS -d $domain"
 done
 
-# Obtain SSL certificate
-certbot --nginx \
-  --non-interactive \
-  --agree-tos \
-  --email chidam.sync@gmail.com \
-  --redirect \
-  --expand \
-  $CERTBOT_DOMAINS \
-  --no-eff-email
+# Run everything in background after DNS update completes
+(
+  sleep 120  # Wait for DNS to propagate
 
-# Test auto-renewal and reload nginx after successful renewal
-certbot renew --dry-run --deploy-hook "systemctl reload nginx"
+  certbot --nginx \
+    --non-interactive \
+    --agree-tos \
+    --email chidam.sync@gmail.com \
+    --redirect \
+    --expand \
+    $CERTBOT_DOMAINS \
+    --no-eff-email
+
+  certbot renew --dry-run --deploy-hook "systemctl reload nginx"
+
+  sleep 180
+  node "$PROJECT_DIR/scripts/email_status.mjs"
+) > /var/log/user-data-postsetup.log 2>&1 &
