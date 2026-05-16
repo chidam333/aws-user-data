@@ -12,7 +12,7 @@ const __dirname = dirname(__filename);
 const LOCK_FILE = '/var/run/email_status_sent';
 const NGINX_SITES_DIR = join(__dirname, 'nginx', 'sites-available');
 const CLOUD_INIT_LOG = '/var/log/cloud-init-output.log';
-const RESEND_FROM_EMAIL = 'ec2-status.chidam.xyz';
+const RESEND_FROM_EMAIL = 'ec2-status@chidam.xyz';
 const RESEND_TO_EMAIL = 'chidam.sync@gmail.com';
 
 function checkLockFile() {
