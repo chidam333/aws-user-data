@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import { RED, GREEN, RESET } from './colors.mjs';
 
 const PARAMS = [
   '/ec2-user/cloudfare-api-token',
@@ -9,13 +10,7 @@ const PARAMS = [
 ];
 
 const REGION = 'ap-south-2';
-
-const paramNames = PARAMS.map(p => `"${p}"`).join(' ');
-
-const cmd = `aws ssm get-parameters --names ${paramNames} --region ${REGION} --with-decryption --output json`;
-
-const result = execSync(cmd, { encoding: 'utf8' });
-const { Parameters } = JSON.parse(result);
+const ENDPOINT = 'https://ssm.ap-south-2.api.aws';
 
 const envMap = {
   '/ec2-user/cloudfare-api-token': 'CF_API_TOKEN',
@@ -25,10 +20,27 @@ const envMap = {
   '/ec2-user/resend-api-token': 'RESEND_API_TOKEN',
 };
 
-for (const param of Parameters) {
-  const envVar = envMap[param.Name];
-  if (envVar) {
-    // this will log the variables which in @user-data.sh will be evalled to set the environment variables
-    console.log(`export ${envVar}="${param.Value}"`);
+const paramNames = PARAMS.join(' ');
+const cmd = `aws ssm get-parameters --names ${paramNames} --region ${REGION} --endpoint-url ${ENDPOINT} --with-decryption --output json`;
+
+try {
+  const result = execSync(cmd, { encoding: 'utf8' });
+  const { Parameters } = JSON.parse(result);
+
+  if (!Parameters || Parameters.length === 0) {
+    console.error(`${RED}ERROR: No parameters returned from SSM${RESET}`);
+    process.exit(1);
   }
+
+  for (const param of Parameters) {
+    const envVar = envMap[param.Name];
+    if (envVar) {
+      console.log(`export ${envVar}="${param.Value}"`);
+    }
+  }
+
+  console.error(`${GREEN}SUCCESS: Loaded environment variables from SSM${RESET}`);
+} catch (err) {
+  console.error(`${RED}ERROR: Failed to load SSM parameters: ${err.message}${RESET}`);
+  process.exit(1);
 }
