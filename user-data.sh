@@ -77,6 +77,7 @@ certbot --nginx \
   --agree-tos \
   --email chidam.sync@gmail.com \
   --redirect \
+  --expand \
   $CERTBOT_DOMAINS \
   --no-eff-email
 
