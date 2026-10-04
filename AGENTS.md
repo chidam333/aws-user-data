@@ -22,5 +22,18 @@ EC2 bootstrap that installs Node.js, Nginx, Tailscale, Certbot, and updates Clou
 - **DNS update runs BEFORE certbot** (required for domain verification)
 - **ES modules** - use .mjs extension
 
+## Remote Access
+Homelab (`home@100.64.104.52`) and the EC2 proxy (`ec2-user@ec2-proxy`) are reachable over Tailscale with SSH alone (no AWS login needed). Use the AWS CLI (`--profile personal`) only for debugging. See [docs/agent-access.md](docs/agent-access.md) for commands, gotchas, and what needs user approval.
+
 ## Testing
 No local tests. Changes must be deployed to S3 and verified on actual EC2 instance launch.
+
+## Home Lab (`home-lab-scripts/`)
+Scripts for the home lab server, not deployed by CI (workflow ignores this folder).
+- Install: clone the repo on the home lab, then `sudo ./home-lab-scripts/<service>/init.sh` (idempotent; re-run after `git pull`)
+- Installs scripts to `/usr/local/bin/homelab/<service>/`, units to `/etc/systemd/system/`
+- Secrets live in `/etc/homelab/*.env` (created from `*.env.example`), never in the repo
+- `common/`: shared `ntfy.sh` helper and `notify-failure@.service`; every service unit should set
+  `OnFailure=notify-failure@%n.service` so any failure (exit code, timeout, start failure) alerts via ntfy
+- `immich-backup/`: nightly 03:00 rclone sync of Immich UPLOAD_LOCATION (incl. 02:00 DB dumps in `backups/`),
+  deleted files kept in dated `--backup-dir` archives

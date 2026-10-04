@@ -1,0 +1,11 @@
+[Unit]
+Description=Immich Backup Timer
+
+[Timer]
+# Runs an hour after Immich's 2:00 AM IST DB dump, so the dump is included in the backup.
+# Timezone is explicit because the server clock is UTC while Immich schedules in IST.
+OnCalendar=*-*-* 03:00:00 Asia/Kolkata
+Persistent=true
+
+[Install]
+WantedBy=timers.target

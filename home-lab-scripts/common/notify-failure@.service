@@ -1,0 +1,7 @@
+[Unit]
+Description=ntfy alert for failed unit %i
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/homelab/ntfy.env
+ExecStart=/usr/local/bin/homelab/common/notify-failure.sh %i
