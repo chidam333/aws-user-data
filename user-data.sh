@@ -22,8 +22,16 @@ EOF
 # Install Nginx with njs module from nginx.org
 dnf -y install nginx nginx-module-njs
 
-# Install Tailscale
-curl -fsSL https://tailscale.com/install.sh | sh && sudo tailscale up --auth-key="$TAILSCALE_AUTH_KEY"
+# Install Tailscale and join the tailnet.
+# TAILSCALE_AUTH_KEY is an OAuth client secret (tskey-client-...), which does not expire;
+# tailscale mints a fresh auth key from it on each login. OAuth logins require a tag.
+curl -fsSL https://tailscale.com/install.sh | sh
+if ! tailscale up \
+  --auth-key="${TAILSCALE_AUTH_KEY}?ephemeral=false&preauthorized=true" \
+  --advertise-tags=tag:ec2 \
+  --hostname=ec2-proxy; then
+  echo "ERROR: tailscale up failed - sites proxied over the tailnet (e.g. photos) will be unreachable" >&2
+fi
 
 # Install Certbot and Auto-Renewal with nginx reload hook
 dnf -y install certbot python3-certbot-nginx
